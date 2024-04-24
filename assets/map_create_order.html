@@ -1,0 +1,163 @@
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+          crossorigin=""></script>
+  <style>
+    html, body {
+      height: 100%;
+      padding: 0;
+      margin: 0;
+    }
+    #map {
+      /* configure the size of the map */
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+  var polylines = [];
+  // initialize Leaflet
+  var map = L.map('map', {tap: false}).setView({lon: 0, lat: 0}, 6);
+
+  // add the OpenStreetMap tiles
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: false
+  }).addTo(map);
+
+  // show the scale bar on the lower left corner
+  L.control.scale({imperial: true, metric: true}).addTo(map);
+  map.attributionControl.setPrefix(false);
+
+
+  let appState = window.parent._appState;
+  window.parent._stateSet = function () {
+    console.log('HELLO From Flutter!!')
+  };
+
+  // show a marker on the map
+  map.on('dblclick',function (e){
+    //L.marker(e.latlng).addTo(map)
+  } )
+
+  var lat, lng;
+
+  const currentURL = window.location.href;
+
+  map.on('click',function (e) {
+    var _lat = e.latlng.lat;
+    var _lon = e.latlng.lng;
+
+    console.log("click", _lat, _lon);
+
+    appState.onMapCl(_lat, _lon);
+  })
+
+  printCoordinat = function (lat, lon){
+    console.log("point", lat, lon)
+  }
+
+  window.parent._createPolyline = function (points) {
+    polylines.forEach(function (item) {
+      map.removeLayer(item)
+    });
+    console.log("start polyline create");
+
+    var polyline = L.polyline(points, {
+      color: 'red',
+      opacity: 1,
+      weight: 3,
+      clickable: false
+    }).addTo(map);
+
+    polylines.push(polyline);
+  };
+
+  _createPolyline = function (points) {
+    polylines.forEach(function (item) {
+      map.removeLayer(item)
+    });
+    console.log("start polyline create");
+
+    var polyline = L.polyline(points, {
+      color: 'red',
+      opacity: 1,
+      weight: 3,
+      clickable: false
+    }).addTo(map);
+
+    polylines.push(polyline);
+  };
+
+
+  window.parent._addMarkerCustom = function (lat, lon, title, names, action) {
+    let html = `<h2>${title}</h2><ul>`;
+
+    for (let i = 0; i < names.length; i++) {
+      console.log(names[i]);
+      console.log(action[i]);
+      html += '<button id="'+ action[i] + '" onClick="appState.customCl(' + action[i] + ')">'+ names[i] + '</button>';
+    }
+
+    L.marker(L.latLng(lat, lon)).bindPopup(
+            html
+    ).addTo(map);
+  };
+
+  _addMarkerCustom = function (lat, lon) {
+    console.log('Im embeded((');
+
+    L.marker(L.latLng(lat, lon)).bindPopup(
+            '<h3> fwefwef</h3> <p>gergerg</p> <button id="increment" onClick="printCoordinat( '+ lat +' , ' + lon + ')">Подробнее</button>'
+    ).addTo(map);
+  };
+
+
+  window.parent._addMarker = function (lat, lon) {
+    console.log('Im launch from parent!');
+
+    L.marker(L.latLng(lat, lon)).bindPopup(
+            '<h3> fwefwef</h3> <p>gergerg</p> <button id="increment" onClick="appState.increment( '+ lat +' , ' + lon + ')">Подробнее</button>'
+    ).addTo(map);
+  };
+
+  _addMarker = function (lat, lon) {
+    console.log('Im embeded((');
+
+    L.marker(L.latLng(lat, lon)).bindPopup(
+            '<h3> fwefwef</h3> <p>gergerg</p> <button id="increment" onClick="printCoordinat( '+ lat +' , ' + lon + ')">Подробнее</button>'
+    ).addTo(map);
+  };
+
+
+  window.parent._goToPoint = function (lat, lon) {
+    map.panTo(L.latLng(lat, lon));
+  };
+
+  _goToPoint = function (lat, lon) {
+    map.panTo(L.latLng(lat, lon));
+  };
+
+
+  window.parent._goToPointThenZoom = function (lat, lon, zoom) {
+    map.flyTo(L.latLng(lat, lon), zoom);
+  };
+
+  _goToPointThenZoom = function (lat, lon, zoom) {
+    map.flyTo(L.latLng(lat, lon), zoom);
+  };
+
+
+</script>
+</body>
+</html>
