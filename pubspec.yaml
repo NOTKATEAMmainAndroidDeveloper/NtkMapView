@@ -1,7 +1,7 @@
 name: ntk_map_view
 description: "A crossplatform map view for flutter based on leaflet"
 version: 0.0.1
-homepage:
+repository: https://github.com/NOTKATEAMmainAndroidDeveloper/NtkMapView
 
 environment:
   sdk: '>=3.2.6 <4.0.0'
