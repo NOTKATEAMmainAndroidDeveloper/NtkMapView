@@ -71,33 +71,29 @@ NtkMapViewInterface(
 
 ## Work with controller
 for now moment controller have a next method:
-1. addMarker(LatLng point, Function(LatLng point)? callback)
-   <br/>add a marker on the map and returned callback when you clicked on it<br/>
-<br/>
-2. goToPoint(LatLng point)
-   <br/>move center camera on point(like panTo in leaflet)<br/>
-<br/>
-3. goToPointThenZoom(LatLng point, double zoom)
-   <br/>move camera and zoom to point(like flyTo in leaflet)<br/>
-<br/>
-4. addCustomMarker(LatLng point, String title, List<String> names, List<Function> acts);
+1. **addMarker(LatLng point, Function(LatLng point)? callback)**
+   <br/>add a marker on the map and returned callback when you clicked on it
+2. **goToPoint(LatLng point)**
+   <br/>move center camera on point(like panTo in leaflet)
+3. **goToPointThenZoom(LatLng point, double zoom)**
+   <br/>move camera and zoom to point(like flyTo in leaflet)
+4. **addPolyline(List points)**
+   <br/>create polyline on List of points(also clear all previous polyline)
+5. **addCustomMarker(LatLng point, String title, List<String> names, List<Function> acts)**
    <br/>create marker on point with title, in this marker you may configure a button and its callback
-   ```dart
-   ntkMapController.addCustomMarker(
-      latLng, addressName,
-      ["from",  "to"],
-      [(){
-       this "from" callback
-      },
-      (){
-       this "to" callback
-      },
-      ]
-   );
-   ```
-5. addPolyline(List points)
-   <br/>create polyline on List of points(also clear all previous polyline)<br/>
-<br/>
+```dart
+ntkMapController.addCustomMarker(
+  latLng, addressName,
+  ["from",  "to"],
+  [(){
+    this "from" callback
+  },
+  (){
+    this "to" callback
+  },
+])
+```
+
 
 ## In future
 In next version we may add: 
