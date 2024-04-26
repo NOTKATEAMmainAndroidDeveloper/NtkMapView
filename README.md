@@ -81,20 +81,20 @@ for now moment controller have a next method:
    <br/>move camera and zoom to point(like flyTo in leaflet)<br/>
 <br/>
 4. addCustomMarker(LatLng point, String title, List<String> names, List<Function> acts);
-   <br/>create marker on point with title, in this marker you may configure a button and its callback<br/>
+   <br/>create marker on point with title, in this marker you may configure a button and its callback
    ```dart
    ntkMapController.addCustomMarker(
-   latLng, addressName,
-   ["from",  "to"],
-   [(){
-    this "from" callback
-   },
-   (){
-    this "to" callback
-   },
-   ]);
+      latLng, addressName,
+      ["from",  "to"],
+      [(){
+       this "from" callback
+      },
+      (){
+       this "to" callback
+      },
+      ]
+   );
    ```
-
 5. addPolyline(List points)
    <br/>create polyline on List of points(also clear all previous polyline)<br/>
 <br/>
