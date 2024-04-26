@@ -13,3 +13,6 @@
 
 ## 0.0.5
 * Fix another readme issue
+
+## 0.0.6
+* Update plugin constraint and add example
