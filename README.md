@@ -71,15 +71,15 @@ NtkMapViewInterface(
 
 ## Work with controller
 for now moment controller have a next method:
-1. **addMarker(LatLng point, Function(LatLng point)? callback)**
+<br/><br/>**addMarker(LatLng point, Function(LatLng point)? callback)**
    <br/>add a marker on the map and returned callback when you clicked on it
-2. **goToPoint(LatLng point)**
+<br/><br/>**goToPoint(LatLng point)**
    <br/>move center camera on point(like panTo in leaflet)
-3. **goToPointThenZoom(LatLng point, double zoom)**
+<br/><br/>**goToPointThenZoom(LatLng point, double zoom)**
    <br/>move camera and zoom to point(like flyTo in leaflet)
-4. **addPolyline(List points)**
+<br/><br/>**addPolyline(List points)**
    <br/>create polyline on List of points(also clear all previous polyline)
-5. **addCustomMarker(LatLng point, String title, List<String> names, List<Function> acts)**
+<br/><br/>**addCustomMarker(LatLng point, String title, List<String> names, List<Function> acts)**
    <br/>create marker on point with title, in this marker you may configure a button and its callback
 ```dart
 ntkMapController.addCustomMarker(
@@ -94,13 +94,31 @@ ntkMapController.addCustomMarker(
 ])
 ```
 
+## Map filter
+> **For now works only on web!**
+
+Use in you controller method
+**applyNewFilter(MapFilter filter);**
+<br/><br/>
+MapFilter fields (*above a default value*):
+```dart
+  int blur = 0;
+  double invert = 0;
+  double grayscale = 0;
+  double bright = 1;
+  double contrast = 1;
+  int hue = 0;
+  double opacity = 1;
+  double saturate = 1;
+  double sepia = 0;
+```
 
 ## In future
-In next version we may add: 
-1. A map customize color
-2. Add a method to chose a tile url
-3. Separate method to clear polyline
-4. Create a method to clear markers
+In next version we may add:
+1. Add a method to chose a tile url
+2. Separate method to clear polyline
+3. Create a method to clear markers
+4. Create filter method for mobile
 
 ## Additional information
 

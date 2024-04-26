@@ -1,13 +1,14 @@
-import '../mobile/ntk_map_controller_mobile.dart'
-if(dart.library.html)'../web/ntk_map_controller_web.dart';
+import 'package:ntk_map_view/models/map_filter_class.dart';
 
+import '../mobile/ntk_map_controller_mobile.dart'
+    if (dart.library.html) '../web/ntk_map_controller_web.dart';
 
 import 'package:latlong2/latlong.dart';
 
 import '../modules/create_unique_uid.dart';
 
 ///Interface to Ntk map controller
-abstract class NtkMapControllerInterface{
+abstract class NtkMapControllerInterface {
   ///Interface to Ntk map controller
   ///
   ///We need to put [viewId] to avoid unhandled error when init
@@ -36,13 +37,17 @@ abstract class NtkMapControllerInterface{
   ///with [title]
   ///buttons with [names]
   ///and callbacks [acts]
-  addCustomMarker(LatLng point, String title, List<String> names, List<Function> acts);
+  addCustomMarker(
+      LatLng point, String title, List<String> names, List<Function> acts);
 
   ///Create polyline on List of [points] (also clear all previous polyline)
   addPolyline(List<LatLng> points);
 
+  ///Apply a new map filter
+  applyNewFilter(MapFilter filter);
+
   ///Create a controller for platform
-  static NtkMapControllerInterface init(String? viewId){
+  static NtkMapControllerInterface init(String? viewId) {
     return NtkMapController(viewId: viewId ?? createUniqueUid(count: 6));
   }
 }

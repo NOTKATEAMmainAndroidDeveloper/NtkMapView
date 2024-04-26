@@ -15,7 +15,6 @@
       margin: 0;
     }
     #map {
-      /* configure the size of the map */
       width: 100%;
       height: 100%;
     }
@@ -25,17 +24,104 @@
 <div id="map"></div>
 
 <script>
+
   var polylines = [];
   // initialize Leaflet
-  var map = L.map('map', {tap: false}).setView({lon: 0, lat: 0}, 6);
+  let map = L.map('map', {tap: false}).setView({lon: 0, lat: 0}, 6);
 
-  // add the OpenStreetMap tiles
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: false
-  }).addTo(map);
+  L.TileLayer.ColorFilter = L.TileLayer.extend({
+    intialize: function (url, options) {
+      L.TileLayer.prototype.initialize.call(this, url, options);
+    },
+    colorFilter: function () {
+      let VALIDFILTERS = [
+        'blur:px',
+        'brightness:%', 'bright:brightness:%', 'bri:brightness:%',
+        'contrast:%', 'con:contrast:%',
+        'grayscale:%', 'gray:grayscale:%',
+        'hue-rotate:deg', 'hue:hue-rotate:deg', 'hue-rotation:hue-rotate:deg',
+        'invert:%', 'inv:invert:%',
+        'opacity:%', 'op:opacity:%',
+        'saturate:%', 'saturation:saturate:%', 'sat:saturate:%',
+        'sepia:%', 'sep:sepia:%',
+      ]
+
+      let colorFilterOptions = this.options.filter ? this.options.filter : [];
+      let filterSettings = colorFilterOptions.map((opt) => {
+        let filter = opt.toLowerCase().split(':');
+        if (filter.length === 2) {
+          let match = VALIDFILTERS.find(vf => {
+            return (vf.split(':')[0] === filter[0]);
+          });
+          if (match) {
+            match = match.split(':');
+            filter[1] += /^\d+$/.test(filter[1]) ? match[match.length - 1] : ''
+            return (`${match[match.length - 2]}(${filter[1]})`);
+          }
+        }
+        return ('');
+      }).join(' ');
+      return (filterSettings);
+    },
+    _initContainer: function () {
+      let tile = L.TileLayer.prototype._initContainer.call(this);
+      this._container.style.filter = this.colorFilter();
+    },
+    updateFilter: function (newFilter) {
+      this.options.filter = newFilter;
+      if (this._container) {
+        this._container.style.filter = this.colorFilter();
+      }
+    },
+  })
+
+  let updateMyTiles = function () {
+    newFilter = [
+      `blur:${blur}`,
+      `invert:${invert}`,
+      `grayscale:${gray}`,
+      `bright:${bright}`,
+      `contrast:${contrast}`,
+      `hue:${hue}`,
+      `opacity:${opacity}`,
+      `saturate:${saturate}`,
+      `sepia:${sepia}`,
+    ];
+    tileLayer.updateFilter(newFilter);
+
+    // Filter out if default value.
+    filterSettingsBox.innerHTML = `
+        let myFilter = [${newFilter.filter(o => {
+      return(![
+        'blur:0px','grayscale:0%','invert:0%',
+        'bright:100%','contrast:100%','hue:0deg',
+        'opacity:100%','saturate:100%','sepia:0%'
+      ].includes(o))
+    }).map(o => `'${o}'`)}];
+    `;
+  }
+
+
+  //
+  // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  //   maxZoom: 19,
+  //   attribution: false
+  // }).addTo(map);
 
   // show the scale bar on the lower left corner
+
+  L.tileLayer.colorFilter = function (url, options) {
+    return new L.TileLayer.ColorFilter(url, options);
+  }
+
+
+  let myFilter = ['invert:0%','bright:100%','contrast:100%','hue:0deg','saturate:100%','sepia:0%'];
+
+  let tileLayer = L.tileLayer.colorFilter('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
+    filter: myFilter,
+  }).addTo(map);
+
   L.control.scale({imperial: true, metric: true}).addTo(map);
   map.attributionControl.setPrefix(false);
 
@@ -156,6 +242,21 @@
   _goToPointThenZoom = function (lat, lon, zoom) {
     map.flyTo(L.latLng(lat, lon), zoom);
   };
+
+  window.parent._updateFilter = function (newFilter) {
+    newFilter = [
+      `blur:${newFilter[0]}`,
+      `invert:${newFilter[1]}`,
+      `grayscale:${newFilter[2]}`,
+      `bright:${newFilter[3]}`,
+      `contrast:${newFilter[4]}`,
+      `hue:${newFilter[5]}`,
+      `opacity:${newFilter[6]}`,
+      `saturate:${newFilter[7]}`,
+      `sepia:${newFilter[8]}`,
+    ];
+    tileLayer.updateFilter(newFilter);
+  }
 
 
 </script>

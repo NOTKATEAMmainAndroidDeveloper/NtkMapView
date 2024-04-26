@@ -16,3 +16,12 @@
 
 ## 0.0.6
 * Update plugin constraint and add example
+
+## 0.0.7
+* Fix format
+
+## 0.0.8
+* Fix pubspec description
+
+## 0.0.9
+* Add a change color of map for web
