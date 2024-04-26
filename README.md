@@ -1,3 +1,8 @@
+![Pub Points](https://img.shields.io/pub/points/ntk_map_view)
+![Pub Publisher](https://img.shields.io/pub/publisher/ntk_map_view)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/NOTKATEAMmainAndroidDeveloper/NtkMapView)
+
+
 Crossplatform Flutter map widget, powered with Leaflet(that used OSM)
 
 >> **This package in early development**
