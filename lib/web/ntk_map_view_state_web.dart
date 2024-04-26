@@ -3,7 +3,6 @@ import '../web/ntk_map_controller_web.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_html/html.dart' as html;
 
-
 import 'dart:ui_web'
 if (dart.library.io) '' as ui;
 
@@ -13,11 +12,16 @@ if (dart.library.io) '' as js;
 import 'package:latlong2/latlong.dart';
 import 'package:universal_html/js_util.dart' as js_util;
 
-
+///Mobile state for widget
 @js.JSExport()
 class NtkMapViewState extends State<NtkMapViewInterface> {
   late String viewID;
 
+  ///Internal callback when user click on map
+  ///
+  /// param:
+  /// [lat] - latitude on point
+  /// [lon] - longitude of point
   @js.JSExport()
   void onMapCl(lat, lon) {
     if(widget.onMapClick != null){
@@ -25,30 +29,32 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
     }
   }
 
+  ///Internal callback when user click on markers button
+  ///
+  /// param:
+  /// [buttonId] - id of clicked button
   @js.JSExport()
   void customCl(buttonId){
-    print("Вы нажали на ${buttonId.id}");
     widget.controller!.markersAction[buttonId.id]!();
   }
 
+  ///This a internal callback when user click on marker
+  ///
+  /// param:
+  /// [lat] - latitude on point
+  /// [lon] - longitude of point
   @js.JSExport()
   void increment(var lat, var lon) {
-
     try{
       LatLng point = LatLng(lat, lon);
 
       if(widget.controller!.markers.containsKey(point)){
         widget.controller!.markers[point]!(point);
       }else{
-        print("dont find this marker with lon:${point.longitude}");
-        print("and all point in controller:");
-        print("controller viewId ${widget.controller?.viewId}");
-        widget.controller?.markers.keys.map((e) => print(e.longitude));
-      }
 
-    }catch(ex){
-      print(ex.toString());
-      print("To allow this action be sure you init controller");
+      }
+    }catch(_){
+
     }
   }
 
@@ -60,11 +66,6 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
 
     viewID = widget.controller!.viewId;
 
-    print("check that act is allowed");
-    print(widget.onMapClick != null);
-
-    print("check that act is allowed");
-    print(widget.onCreateEnd != null);
 
     if(widget.onCreateStart != null)widget.onCreateStart!();
     final export = js_util.createDartExport(this);
@@ -100,8 +101,6 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
         viewType: viewID,
         onPlatformViewCreated: (e){
           widget.onCreateEnd!(widget.controller! as NtkMapController);
-
-          print("VIEW $viewID CREATED");
         },
       ),
     );

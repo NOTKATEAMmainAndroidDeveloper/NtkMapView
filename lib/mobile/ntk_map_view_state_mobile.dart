@@ -4,28 +4,29 @@ import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
+
+///Mobile state for widget
 class NtkMapViewState extends State<NtkMapViewInterface> {
+  ///[viewID] to view
   late String viewID;
 
+  ///[controller] of map widget
   static late WebViewController controller;
 
+  ///This a internal callback when user click on marker
+  ///
+  /// param:
+  /// [lat] - latitude on point
+  /// [lon] - longitude of point
   void increment(var lat, var lon) {
     try{
       LatLng point = LatLng(lat, lon);
-
       if(widget.controller!.markers.containsKey(point)){
         widget.controller!.markers[point]!(point);
       }else{
-        print("dont find this marker with lon:${point.longitude}");
-        print("and all point in controller:");
-        print("controller viewId ${widget.controller?.viewId}");
         widget.controller?.markers.keys.map((e) => print(e.longitude));
       }
-
-    }catch(ex){
-      print(ex.toString());
-      print("To allow this action be sure you init controller");
-    }
+    }catch(_){}
   }
 
   @override
