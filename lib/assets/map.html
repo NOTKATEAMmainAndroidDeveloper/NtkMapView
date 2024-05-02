@@ -17,6 +17,7 @@
     #map {
       width: 100%;
       height: 100%;
+      background: transparent;
     }
   </style>
 </head>
@@ -27,7 +28,7 @@
 
   var polylines = [];
   // initialize Leaflet
-  let map = L.map('map', {tap: false}).setView({lon: 0, lat: 0}, 6);
+  let map = L.map('map', {tap: false, zoomControl: false, zoomSnap: 0.5}).setView({lon: 0, lat: 0}, 6);
 
   L.TileLayer.ColorFilter = L.TileLayer.extend({
     intialize: function (url, options) {
@@ -120,6 +121,7 @@
   let tileLayer = L.tileLayer.colorFilter('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
     filter: myFilter,
+    continuousWorld: false
   }).addTo(map);
 
   L.control.scale({imperial: true, metric: true}).addTo(map);
@@ -151,6 +153,10 @@
 
   printCoordinat = function (lat, lon){
     console.log("point", lat, lon)
+  }
+
+  printCustomMarker = function (actionId){
+    console.log("custommarker", actionId)
   }
 
   window.parent._createPolyline = function (points) {
@@ -200,29 +206,32 @@
     ).addTo(map);
   };
 
-  _addMarkerCustom = function (lat, lon) {
-    console.log('Im embeded((');
+  _addMarkerCustom = function (lat, lon, title, names, action) {
+    console.log('Im created custom marker');
+    console.log(title);
 
-    L.marker(L.latLng(lat, lon)).bindPopup(
-            '<h3> fwefwef</h3> <p>gergerg</p> <button id="increment" onClick="printCoordinat( '+ lat +' , ' + lon + ')">Подробнее</button>'
-    ).addTo(map);
+    let html = '<h3>' + title + '</h3><ul>';
+
+    for (let i = 0; i < names.length; i++) {
+      console.log(names[i]);
+      console.log(action[i]);
+      html += '<button onClick="printCustomMarker(' + "'" + action[i] + "'" +')">'+ names[i] + '</button>';
+    }
+
+    L.marker(L.latLng(lat, lon)).bindPopup(html, {maxWidth: "auto"}).addTo(map);
   };
 
 
   window.parent._addMarker = function (lat, lon) {
     console.log('Im launch from parent!');
 
-    L.marker(L.latLng(lat, lon)).bindPopup(
-            '<h3> fwefwef</h3> <p>gergerg</p> <button id="increment" onClick="appState.increment( '+ lat +' , ' + lon + ')">Подробнее</button>'
-    ).addTo(map);
+    L.marker(L.latLng(lat, lon)).addTo(map);
   };
 
   _addMarker = function (lat, lon) {
     console.log('Im embeded((');
 
-    L.marker(L.latLng(lat, lon)).bindPopup(
-            '<h3> fwefwef</h3> <p>gergerg</p> <button id="increment" onClick="printCoordinat( '+ lat +' , ' + lon + ')">Подробнее</button>'
-    ).addTo(map);
+    L.marker(L.latLng(lat, lon)).addTo(map);
   };
 
 
@@ -236,11 +245,17 @@
 
 
   window.parent._goToPointThenZoom = function (lat, lon, zoom) {
-    map.flyTo(L.latLng(lat, lon), zoom);
+    map.flyTo(L.latLng(lat, lon), zoom, {
+      animate: true,
+      duration: 1
+    });
   };
 
   _goToPointThenZoom = function (lat, lon, zoom) {
-    map.flyTo(L.latLng(lat, lon), zoom);
+    map.flyTo(L.latLng(lat, lon), zoom, {
+      animate: true,
+      duration: 1
+    });
   };
 
   window.parent._updateFilter = function (newFilter) {
@@ -256,7 +271,47 @@
       `sepia:${newFilter[8]}`,
     ];
     tileLayer.updateFilter(newFilter);
-  }
+  };
+
+  _updateFilter = function (blur, invert, grayscale, bright, contrast, hue, opacity, saturate, sepia) {
+    newFilter = [
+      `blur:${blur}`,
+      `invert:${invert}`,
+      `grayscale:${grayscale}`,
+      `bright:${bright}`,
+      `contrast:${contrast}`,
+      `hue:${hue}`,
+      `opacity:${opacity}`,
+      `saturate:${saturate}`,
+      `sepia:${sepia}`,
+    ];
+
+    console.log('APPLYING NEW FILTER');
+
+    tileLayer.updateFilter(newFilter);
+  };
+
+  var current_position, current_position_circle;
+
+  window.parent._updateCurrentPosition = function (lat, lon, accuracy) {
+    if (current_position) {
+      map.removeLayer(current_position);
+      map.removeLayer(current_position_circle);
+    }
+
+    current_position = L.marker(L.latLng(lat, lon), {opacity: 0.5}).addTo(map);
+    current_position_circle = L.circle(L.latLng(lat, lon), accuracy, {color: 'color', opacity:.5}).addTo(map);
+  };
+
+  _updateCurrentPosition = function (lat, lon, accuracy) {
+    if (current_position) {
+      map.removeLayer(current_position);
+      map.removeLayer(current_position_circle);
+    }
+
+    current_position = L.marker(L.latLng(lat, lon), {opacity: 0.5}).addTo(map);
+    current_position_circle = L.circle(L.latLng(lat, lon), accuracy, {color: 'color', opacity:.5}).addTo(map);
+  };
 
 
 </script>

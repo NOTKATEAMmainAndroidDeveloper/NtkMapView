@@ -28,6 +28,33 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
     } catch (_) {}
   }
 
+  ///This a internal callback when user click on button in custom marker
+  ///
+  /// param:
+  /// [buttonId] - id of button
+  void customMarkerTapButton(var buttonId) {
+    try {
+      if (widget.controller!.markersAction.containsKey(buttonId)) {
+        widget.controller!.markersAction[buttonId]!();
+      } else {
+        //widget.controller?.markers.keys.map((e) => print(e.longitude));
+      }
+    } catch (_) {}
+  }
+
+  ///TCallback when user click on map
+  ///
+  /// param:
+  /// [lat] - latitude of click
+  /// [lon] - longitude of click
+  void onMapClicked(var lat, var lon) {
+    try {
+      if (widget.onMapClick != null) {
+        widget.onMapClick!(LatLng(lat, lon));
+      }
+    } catch (_) {}
+  }
+
   @override
   void initState() {
     if (mounted) {
@@ -43,12 +70,18 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
             controller.runJavaScript("console.log('HELLO From Flutter!!')"),
             widget.onCreateEnd!(widget.controller! as NtkMapController),
             controller.setOnConsoleMessage((message) {
-              if (message.message.toString().contains('point')) {
+              if (message.message.toString().contains('click')) {
+                var cor = message.message.split(' ');
+                onMapClicked(double.parse(cor[1]), double.parse(cor[2]));
+              } else if (message.message.toString().contains('point')) {
                 var cor = message.message.split(' ');
                 increment(double.parse(cor[1]), double.parse(cor[2]));
+              } else if (message.message.toString().contains('custommarker')) {
+                var cor = message.message.split(' ');
+                customMarkerTapButton(cor[1].toString());
               }
 
-              //print("rec mes ${message.message.toString()}");
+              print("rec mes ${message.message.toString()}");
             })
           });
 
@@ -61,6 +94,7 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
 
     return SizedBox(
         height: size.height,
+        width: size.width,
         child: WebViewWidget(
           controller: controller,
         ));

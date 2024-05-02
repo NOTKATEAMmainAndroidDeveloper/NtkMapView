@@ -43,11 +43,16 @@ abstract class NtkMapControllerInterface {
   ///Create polyline on List of [points] (also clear all previous polyline)
   addPolyline(List<LatLng> points);
 
-  ///Apply a new map filter
+  ///Apply a new map **[filter]**
   applyNewFilter(MapFilter filter);
 
   ///Create a controller for platform
   static NtkMapControllerInterface init(String? viewId) {
     return NtkMapController(viewId: viewId ?? createUniqueUid(count: 6));
   }
+
+  ///Update current position on map
+  ///This create a circle and marker with center in **[point]**
+  ///Radius of circle is **[accuracy]**
+  updateCurrentPosition(LatLng point, double accuracy);
 }

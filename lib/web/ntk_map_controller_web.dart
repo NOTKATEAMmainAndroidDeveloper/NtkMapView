@@ -65,9 +65,19 @@ class NtkMapController extends NtkMapControllerInterface {
         js_util.globalThis, '_createPolyline', [pointsForMap]);
   }
 
+  ///Update **[filter]** map
   @override
   applyNewFilter(MapFilter filter) {
     js_util.callMethod<void>(
         js_util.globalThis, '_updateFilter', [filter.toParameterString()]);
+  }
+
+  ///Update current position on map
+  ///This create a circle and marker with center in **[point]**
+  ///Radius of circle is **[accuracy]**
+  @override
+  updateCurrentPosition(LatLng point, double accuracy) {
+    js_util.callMethod<void>(js_util.globalThis, '_updateCurrentPosition',
+        [point.latitude, point.longitude, accuracy]);
   }
 }

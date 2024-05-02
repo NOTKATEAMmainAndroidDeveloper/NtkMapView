@@ -25,3 +25,12 @@
 
 ## 0.0.9
 * Add a change color of map for web
+
+## 0.0.10
+* Fix format
+
+## 0.0.11
+* Add a change color of map for mobile
+
+## 0.0.12
+* Implemented create custom marker on web and mobile, and update current position

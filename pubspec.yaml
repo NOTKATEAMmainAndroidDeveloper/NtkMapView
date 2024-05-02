@@ -1,6 +1,6 @@
 name: ntk_map_view
 description: "A crossplatform map view for flutter based on leaflet, that provide to create polyline, marker, have many of callbacks to work with map, very high perfomance"
-version: 0.0.9
+version: 0.0.12
 repository: https://github.com/NOTKATEAMmainAndroidDeveloper/NtkMapView
 
 environment:

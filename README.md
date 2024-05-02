@@ -84,6 +84,8 @@ for now moment controller have a next method:
    <br/>move camera and zoom to point(like flyTo in leaflet)
 <br/><br/>**addPolyline(List points)**
    <br/>create polyline on List of points(also clear all previous polyline)
+<br/><br/>**updateCurrentPosition(LatLng point, double accuracy);**
+<br/>Update current position on map. This create a circle and marker with center in **[point]**. Radius of circle is **[accuracy]** **FOR NOW NOT IMPLEMENTED ON MOBILE**
 <br/><br/>**addCustomMarker(LatLng point, String title, List<String> names, List<Function> acts)**
    <br/>create marker on point with title, in this marker you may configure a button and its callback
 ```dart
@@ -100,7 +102,6 @@ ntkMapController.addCustomMarker(
 ```
 
 ## Map filter
-> **For now works only on web!**
 
 Use in you controller method
 **applyNewFilter(MapFilter filter);**
@@ -120,10 +121,9 @@ MapFilter fields (*above a default value*):
 
 ## In future
 In next version we may add:
-1. Add a method to chose a tile url
+1. Add a method to choose a tile url
 2. Separate method to clear polyline
 3. Create a method to clear markers
-4. Create filter method for mobile
 
 ## Additional information
 

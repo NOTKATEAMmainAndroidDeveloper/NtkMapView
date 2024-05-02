@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../modules/create_unique_uid.dart';
 import "../web/ntk_map_view_state_web.dart"
@@ -19,7 +20,9 @@ class NtkMapViewInterface extends StatefulWidget {
       this.onCreateStart,
       this.onCreateEnd,
       this.onMapClick,
-      this.mapPath = "packages/ntk_map_view/assets/map.html",
+      this.mapPath = kReleaseMode
+          ? "assets/packages/ntk_map_view/assets/map.html"
+          : "packages/ntk_map_view/assets/map.html",
       NtkMapControllerInterface? mapController}) {
     if (mapController == null) {
       controller = cont.NtkMapController(viewId: createUniqueUid(count: 6));

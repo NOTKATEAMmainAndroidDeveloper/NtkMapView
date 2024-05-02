@@ -92,8 +92,6 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
         viewType: viewID,
         onPlatformViewCreated: (e) {
           widget.onCreateEnd!(widget.controller! as NtkMapController);
-
-
         },
       ),
     );
