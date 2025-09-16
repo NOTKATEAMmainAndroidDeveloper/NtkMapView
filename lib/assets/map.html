@@ -27,8 +27,9 @@
 <script>
 
   var polylines = [];
+  var markers = [];
   // initialize Leaflet
-  let map = L.map('map', {tap: false, zoomControl: false, zoomSnap: 0.5}).setView({lon: 0, lat: 0}, 6);
+  let map = L.map('map', {tap: false, zoomControl: false, zoomSnap: 0.5}).setView({lon: 30, lat: 55}, 4);
 
   L.TileLayer.ColorFilter = L.TileLayer.extend({
     intialize: function (url, options) {
@@ -103,14 +104,6 @@
   }
 
 
-  //
-  // L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  //   maxZoom: 19,
-  //   attribution: false
-  // }).addTo(map);
-
-  // show the scale bar on the lower left corner
-
   L.tileLayer.colorFilter = function (url, options) {
     return new L.TileLayer.ColorFilter(url, options);
   }
@@ -119,8 +112,9 @@
   let myFilter = ['invert:0%','bright:100%','contrast:100%','hue:0deg','saturate:100%','sepia:0%'];
 
   let tileLayer = L.tileLayer.colorFilter('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
+    attribution: '',
     filter: myFilter,
+    noWrap: true,
     continuousWorld: false
   }).addTo(map);
 
@@ -148,16 +142,8 @@
 
     console.log("click", _lat, _lon);
 
-    appState.onMapCl(_lat, _lon);
+    window.parent.onMapCl(_lat, _lon);
   })
-
-  printCoordinat = function (lat, lon){
-    console.log("point", lat, lon)
-  }
-
-  printCustomMarker = function (actionId){
-    console.log("custommarker", actionId)
-  }
 
   window.parent._createPolyline = function (points) {
     polylines.forEach(function (item) {
@@ -175,52 +161,179 @@
     polylines.push(polyline);
   };
 
-  _createPolyline = function (points) {
-    polylines.forEach(function (item) {
+  window.parent._clearAllMarkers = function () {
+    markers.forEach(function (item) {
       map.removeLayer(item)
     });
-    console.log("start polyline create");
-
-    var polyline = L.polyline(points, {
-      color: 'red',
-      opacity: 1,
-      weight: 3,
-      clickable: false
-    }).addTo(map);
-
-    polylines.push(polyline);
   };
 
+  function imgsrc(idImage, images) {
+    slide(1, idImage, images);
+  }
 
-  window.parent._addMarkerCustom = function (lat, lon, title, names, action) {
-    let html = `<h2>${title}</h2><ul>`;
+  function slide(ind, idImage, images) {
+    var image = document.getElementById(idImage);
 
-    for (let i = 0; i < names.length; i++) {
-      console.log(names[i]);
-      console.log(action[i]);
-      html += '<button id="'+ action[i] + '" onClick="appState.customCl(' + action[i] + ')">'+ names[i] + '</button>';
+    let current = + image.dataset.current;
+    current += ind;
+    if (current >= images.length)
+      current = 0;
+    if (current < 0)
+      current = images.length - 1;
+    image.src = images[current];
+    image.dataset.current = current;
+  }
+
+  function makeid(length) {
+    let result = '';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+    const charactersLength = characters.length;
+    let counter = 0;
+    while (counter < length) {
+      result += characters.charAt(Math.floor(Math.random() * charactersLength));
+      counter += 1;
+    }
+    return result;
+  }
+
+  window.parent._addMarkerCustom = function (lat, lon, title, icon, buttons, images, contents) {
+
+    let html = ``;
+
+    if(images != null){
+      let newId = makeid(5);
+
+      html += `
+       <div style='text-align: center; cursor: e-resize;'>
+         <img style="width: 310px; height: 150px; object-fit: cover;" src="` + images[0] + `" id="` + newId + `"  onclick="imgsrc(` + newId + `, ` + images + `);" />
+       </div>
+     `
     }
 
-    L.marker(L.latLng(lat, lon)).bindPopup(
-            html
-    ).addTo(map);
-  };
+    html += `<h2>${title}</h2>`;
 
-  _addMarkerCustom = function (lat, lon, title, names, action) {
-    console.log('Im created custom marker');
-    console.log(title);
+    if(contents != null){
+      for (let i = 0; i < contents.length; i++) {
+        try{
+          console.log(contents[i]);
+        }catch (ex){
 
-    let html = '<h3>' + title + '</h3><ul>';
+        }
 
-    for (let i = 0; i < names.length; i++) {
-      console.log(names[i]);
-      console.log(action[i]);
-      html += '<button onClick="printCustomMarker(' + "'" + action[i] + "'" +')">'+ names[i] + '</button>';
+        var tempObject = JSON.parse(contents[i]);
+
+        try{
+          console.log(tempObject);
+        }catch (ex){
+
+        }
+
+        html += `<h3>` + tempObject['title'];
+
+        try{
+          if(tempObject['description'] != null){
+            if(tempObject['description'] !== "null"){
+              html += `<span style="font-weight: normal">` + tempObject['description'] + `</span>`;
+            }
+          }
+        }catch (ex){}
+
+        html += `</h3>`;
+      }
     }
 
-    L.marker(L.latLng(lat, lon)).bindPopup(html, {maxWidth: "auto"}).addTo(map);
-  };
+    html += `<table>`;
 
+    for (let i = 0; i < buttons.length; i++) {
+      console.log(buttons[i]);
+
+      const mapObject = JSON.parse(buttons[i]);
+
+      var styleText = '; style="border: none;';
+
+      try{
+        if(mapObject['colorHex'] !== 'null'){
+          styleText += 'background: ' + mapObject['colorHex'] + ';';
+        }
+      }catch (e) {
+
+      }
+
+      try{
+        if(mapObject['textColorHex'] !== 'null'){
+          styleText += 'color: ' + mapObject['textColorHex'] + ';';
+        }
+      }catch (e) {
+
+      }
+
+      try{
+        if(mapObject['borderRadius'] !== 'null'){
+          styleText += 'border-radius: ' + Number(mapObject['borderRadius']) + 'px' + ';';
+        }
+      }catch (e) {
+
+      }
+
+      try{
+        if(mapObject['height'] !== 'null'){
+          styleText += 'height: ' + Number(mapObject['height']) + 'px' + ';';
+        }
+      }catch (e) {
+
+      }
+
+      try{
+        if(mapObject['width'] !== 'null'){
+          styleText += 'width: ' + Number(mapObject['width']) + 'px' + ';';
+        }
+      }catch (e) {
+
+      }
+
+      styleText += '";';
+
+      html += `<td>`;
+      html += `<button id='` + mapObject['id'] + `' ` + styleText + ` onClick="window.parent.customCl('` + mapObject['id']  + `')">`+ mapObject['name'] + '</button>';
+      html += `</td>`;
+    }
+
+    html += `</table>`;
+
+
+    if(icon !== 'none'){
+      var tempIconObject = JSON.parse(icon);
+
+      var iconOptions = {
+        iconUrl: tempIconObject['iconPath'],
+        iconSize: [Number(tempIconObject['width']), Number(tempIconObject['height'])],
+        iconAnchor: [Number(Number(tempIconObject['width']) / 2), Number(tempIconObject['height'])],
+      }
+
+      var customIcon = L.icon(iconOptions);
+
+      var markerOptions = {
+        title: title,
+        clickable: true,
+        draggable: false,
+        icon: customIcon
+      }
+      // Creating a custom icon
+
+
+      var marker = L.marker(L.latLng(lat, lon), markerOptions).bindPopup(
+              html
+      ).addTo(map);
+
+      markers.push(marker);
+    }else{
+      var marker = L.marker(L.latLng(lat, lon)).bindPopup(
+              html
+      ).addTo(map);
+
+      markers.push(marker);
+    }
+  };
 
   window.parent._addMarker = function (lat, lon) {
     console.log('Im launch from parent!');
@@ -228,30 +341,11 @@
     L.marker(L.latLng(lat, lon)).addTo(map);
   };
 
-  _addMarker = function (lat, lon) {
-    console.log('Im embeded((');
-
-    L.marker(L.latLng(lat, lon)).addTo(map);
-  };
-
-
   window.parent._goToPoint = function (lat, lon) {
     map.panTo(L.latLng(lat, lon));
   };
 
-  _goToPoint = function (lat, lon) {
-    map.panTo(L.latLng(lat, lon));
-  };
-
-
   window.parent._goToPointThenZoom = function (lat, lon, zoom) {
-    map.flyTo(L.latLng(lat, lon), zoom, {
-      animate: true,
-      duration: 1
-    });
-  };
-
-  _goToPointThenZoom = function (lat, lon, zoom) {
     map.flyTo(L.latLng(lat, lon), zoom, {
       animate: true,
       duration: 1
@@ -273,24 +367,6 @@
     tileLayer.updateFilter(newFilter);
   };
 
-  _updateFilter = function (blur, invert, grayscale, bright, contrast, hue, opacity, saturate, sepia) {
-    newFilter = [
-      `blur:${blur}`,
-      `invert:${invert}`,
-      `grayscale:${grayscale}`,
-      `bright:${bright}`,
-      `contrast:${contrast}`,
-      `hue:${hue}`,
-      `opacity:${opacity}`,
-      `saturate:${saturate}`,
-      `sepia:${sepia}`,
-    ];
-
-    console.log('APPLYING NEW FILTER');
-
-    tileLayer.updateFilter(newFilter);
-  };
-
   var current_position, current_position_circle;
 
   window.parent._updateCurrentPosition = function (lat, lon, accuracy) {
@@ -303,16 +379,7 @@
     current_position_circle = L.circle(L.latLng(lat, lon), accuracy, {color: 'color', opacity:.5}).addTo(map);
   };
 
-  _updateCurrentPosition = function (lat, lon, accuracy) {
-    if (current_position) {
-      map.removeLayer(current_position);
-      map.removeLayer(current_position_circle);
-    }
-
-    current_position = L.marker(L.latLng(lat, lon), {opacity: 0.5}).addTo(map);
-    current_position_circle = L.circle(L.latLng(lat, lon), accuracy, {color: 'color', opacity:.5}).addTo(map);
-  };
-
+  window.parent.onCreatedEnd();
 
 </script>
 </body>

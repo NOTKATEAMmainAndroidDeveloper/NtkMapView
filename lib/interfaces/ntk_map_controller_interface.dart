@@ -1,7 +1,9 @@
+import 'package:ntk_map_view/models/map_button_class.dart';
 import 'package:ntk_map_view/models/map_filter_class.dart';
+import 'package:ntk_map_view/models/map_marker_content_model.dart';
+import 'package:ntk_map_view/models/map_marker_icon_model.dart';
 
-import '../mobile/ntk_map_controller_mobile.dart'
-    if (dart.library.html) '../web/ntk_map_controller_web.dart';
+import '../mobile/ntk_map_controller_mobile.dart' if (dart.library.html) '../web/ntk_map_controller_web.dart';
 
 import 'package:latlong2/latlong.dart';
 
@@ -37,8 +39,14 @@ abstract class NtkMapControllerInterface {
   ///with [title]
   ///buttons with [names]
   ///and callbacks [acts]
-  addCustomMarker(
-      LatLng point, String title, List<String> names, List<Function> acts);
+  addCustomMarker({
+    required LatLng point,
+    required String title,
+    MapMarkerIconModel? icon,
+    required List<MapButtonClass> buttons,
+    List<String>? images,
+    List<MapMarkerContentModel>? content
+  });
 
   ///Create polyline on List of [points] (also clear all previous polyline)
   addPolyline(List<LatLng> points);
@@ -55,4 +63,7 @@ abstract class NtkMapControllerInterface {
   ///This create a circle and marker with center in **[point]**
   ///Radius of circle is **[accuracy]**
   updateCurrentPosition(LatLng point, double accuracy);
+
+  ///Remove all Markers
+  clearAllMarkers();
 }

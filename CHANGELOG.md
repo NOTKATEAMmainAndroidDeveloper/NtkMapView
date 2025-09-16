@@ -34,3 +34,19 @@
 
 ## 0.0.12
 * Implemented create custom marker on web and mobile, and update current position
+
+## 0.0.13
+* Incrase perfomance on mobile web
+
+## 0.0.14
+* Supported WASM
+
+
+## 0.0.15
+* Some fixs
+
+## 0.0.16
+* Change start point to Europe
+
+## 0.1.0
+* Add creating custom point with description

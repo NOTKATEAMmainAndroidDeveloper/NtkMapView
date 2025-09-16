@@ -1,0 +1,305 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    <style>
+        html, body {
+            height: 100%;
+            padding: 0;
+            margin: 0;
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+        }
+    </style>
+
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+
+</head>
+<body>
+<div id="map"></div>
+
+<script>
+    var current_position, current_position_circle;
+
+    var polylines = [];
+    var markers = [];
+    // initialize Leaflet
+    let map = L.map('map', {tap: false, zoomControl: false, zoomSnap: 0.5}).setView({lon: 30, lat: 55}, 4);
+
+    L.TileLayer.ColorFilter = L.TileLayer.extend({
+        intialize: function (url, options) {
+            L.TileLayer.prototype.initialize.call(this, url, options);
+        },
+        colorFilter: function () {
+            let VALIDFILTERS = [
+                'blur:px',
+                'brightness:%', 'bright:brightness:%', 'bri:brightness:%',
+                'contrast:%', 'con:contrast:%',
+                'grayscale:%', 'gray:grayscale:%',
+                'hue-rotate:deg', 'hue:hue-rotate:deg', 'hue-rotation:hue-rotate:deg',
+                'invert:%', 'inv:invert:%',
+                'opacity:%', 'op:opacity:%',
+                'saturate:%', 'saturation:saturate:%', 'sat:saturate:%',
+                'sepia:%', 'sep:sepia:%',
+            ]
+
+            let colorFilterOptions = this.options.filter ? this.options.filter : [];
+            let filterSettings = colorFilterOptions.map((opt) => {
+                let filter = opt.toLowerCase().split(':');
+                if (filter.length === 2) {
+                    let match = VALIDFILTERS.find(vf => {
+                        return (vf.split(':')[0] === filter[0]);
+                    });
+                    if (match) {
+                        match = match.split(':');
+                        filter[1] += /^\d+$/.test(filter[1]) ? match[match.length - 1] : ''
+                        return (`${match[match.length - 2]}(${filter[1]})`);
+                    }
+                }
+                return ('');
+            }).join(' ');
+            return (filterSettings);
+        },
+        _initContainer: function () {
+            let tile = L.TileLayer.prototype._initContainer.call(this);
+            this._container.style.filter = this.colorFilter();
+        },
+        updateFilter: function (newFilter) {
+            this.options.filter = newFilter;
+            if (this._container) {
+                this._container.style.filter = this.colorFilter();
+            }
+        },
+    })
+
+
+    L.tileLayer.colorFilter = function (url, options) {
+        return new L.TileLayer.ColorFilter(url, options);
+    }
+
+
+    let myFilter = ['invert:0%','bright:100%','contrast:100%','hue:0deg','saturate:100%','sepia:0%'];
+
+    let tileLayer = L.tileLayer.colorFilter('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '<a href="https://wikimediafoundation.org/wiki/Maps_Terms_of_Use">Wikimedia</a>',
+        filter: myFilter,
+        noWrap: true,
+        continuousWorld: false
+    }).addTo(map);
+
+    L.control.scale({imperial: true, metric: true}).addTo(map);
+    map.attributionControl.setPrefix(false);
+
+
+    map.on('click',function (e) {
+        var _lat = e.latlng.lat;
+        var _lon = e.latlng.lng;
+
+        console.log("click", _lat, _lon);
+
+        appState.onMapCl(_lat, _lon);
+    })
+
+    _createPolyline = function (points) {
+        polylines.forEach(function (item) {
+            map.removeLayer(item)
+        });
+        console.log("start polyline create");
+
+        var polyline = L.polyline(points, {
+            color: 'red',
+            opacity: 1,
+            weight: 3,
+            clickable: false
+        }).addTo(map);
+
+        polylines.push(polyline);
+    };
+
+    _clearAllMarkers = function () {
+        markers.forEach(function (item) {
+            map.removeLayer(item)
+        });
+    };
+
+    printCoordinat = function (lat, lon){
+        console.log("point", lat, lon)
+    }
+
+    printCustomMarker = function (actionId){
+        console.log("custommarker", actionId)
+    }
+
+    function makeid(length) {
+        let result = '';
+        const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+        const charactersLength = characters.length;
+        let counter = 0;
+        while (counter < length) {
+            result += characters.charAt(Math.floor(Math.random() * charactersLength));
+            counter += 1;
+        }
+        return result;
+    }
+
+    _addMarkerCustom = function (lat, lon, title, icon, buttons, images, contents) {
+        let html = ``;
+
+        if(images != null){
+          let newId = makeid(5);
+
+          html += `
+            <div style='text-align: center; cursor: e-resize;'>
+              <img style="width: 200px; height: 112px; object-fit: cover;" src="` + images[0] + `" id="` + newId + `"  onclick="imgsrc(` + newId + `, ` + images + `);" />
+            </div>
+          `
+        }
+
+        html += `<h2 style="font-size: 14px">${title}</h2>`;
+
+
+        if(contents != null){
+            for (let i = 0; i < contents.length; i++) {
+                var tempObject = JSON.parse(contents[i]);
+
+                html += `<h3 style="font-size: 12px">` + tempObject['title'];
+
+                try{
+                    if(tempObject['description'] != null){
+                        if(tempObject['description'] !== "null"){
+                            html += `<span style="font-weight: normal; font-size: 12px">` + tempObject['description'] + `</span>`;
+                        }
+                    }
+                }catch (ex){}
+
+                html += `</h3>`;
+            }
+        }
+
+        html += `<table>`;
+
+
+        for (let i = 0; i < buttons.length; i++) {
+            const mapObject = JSON.parse(buttons[i]);
+
+            var styleText = '; style="border: none;';
+
+            try{
+                if(mapObject['colorHex'] !== 'null'){
+                    styleText += 'background: ' + mapObject['colorHex'] + ';';
+                }
+            }catch (e) {
+
+            }
+
+            try{
+                if(mapObject['textColorHex'] !== 'null'){
+                    styleText += 'color: ' + mapObject['textColorHex'] + ';';
+                }
+            }catch (e) {
+
+            }
+
+            try{
+                if(mapObject['borderRadius'] !== 'null'){
+                    styleText += 'border-radius: ' + Number(mapObject['borderRadius']) + 'px' + ';';
+                }
+            }catch (e) {
+
+            }
+
+            try{
+                if(mapObject['height'] !== 'null'){
+                    styleText += 'height: ' + Number(mapObject['height']) + 'px' + ';';
+                }
+            }catch (e) {
+
+            }
+
+
+            styleText += '";';
+
+            html += `<td>`;
+            html += `<button id='` + mapObject['id'] + `' ` + styleText + ` onClick="printCustomMarker('` + mapObject['id']  + `')">`+ mapObject['name'] + '</button>';
+            html += `</td>`;
+        }
+
+        html += `</table>`;
+
+
+        if(icon !== 'none'){
+            var tempIconObject = JSON.parse(icon);
+
+            var iconOptions = {
+                iconUrl: tempIconObject['iconPath'],
+                iconSize: [Number(tempIconObject['width']), Number(tempIconObject['height'])],
+                iconAnchor: [Number(Number(tempIconObject['width']) / 2), Number(tempIconObject['height'])],
+            }
+
+            var customIcon = L.icon(iconOptions);
+
+            var markerOptions = {
+                title: title,
+                clickable: true,
+                draggable: false,
+                icon: customIcon
+            }
+            // Creating a custom icon
+
+
+            var marker = L.marker(L.latLng(lat, lon), markerOptions).bindPopup(
+                html, {maxWidth: "200px"}
+            ).addTo(map);
+
+            markers.push(marker);
+        }else{
+            var marker = L.marker(L.latLng(lat, lon)).bindPopup(
+                html, {maxWidth: "200px"}
+            ).addTo(map);
+
+            markers.push(marker);
+        }
+    };
+
+
+    _updateFilter = function (blur, invert, grayscale, bright, contrast, hue, opacity, saturate, sepia) {
+        newFilter = [
+            `blur:${blur}`,
+            `invert:${invert}`,
+            `grayscale:${grayscale}`,
+            `bright:${bright}`,
+            `contrast:${contrast}`,
+            `hue:${hue}`,
+            `opacity:${opacity}`,
+            `saturate:${saturate}`,
+            `sepia:${sepia}`,
+        ];
+
+        console.log('APPLYING NEW FILTER');
+
+        tileLayer.updateFilter(newFilter);
+    };
+
+    _updateCurrentPosition = function (lat, lon, accuracy) {
+        if (current_position) {
+            map.removeLayer(current_position);
+            map.removeLayer(current_position_circle);
+        }
+
+        current_position = L.marker(L.latLng(lat, lon), {opacity: 0.5}).addTo(map);
+        current_position_circle = L.circle(L.latLng(lat, lon), accuracy, {color: 'color', opacity:.5}).addTo(map);
+    };
+
+
+</script>
+</body>
+</html>

@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 import '../interfaces/ntk_view_interface.dart';
 import '../mobile/ntk_map_controller_mobile.dart';
 import 'package:flutter/material.dart';
@@ -66,24 +68,34 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
     controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(const Color(0x00000000))
-      ..loadFlutterAsset(widget.mapPath).then((value) => {
-            controller.runJavaScript("console.log('HELLO From Flutter!!')"),
-            widget.onCreateEnd!(widget.controller! as NtkMapController),
-            controller.setOnConsoleMessage((message) {
-              if (message.message.toString().contains('click')) {
-                var cor = message.message.split(' ');
-                onMapClicked(double.parse(cor[1]), double.parse(cor[2]));
-              } else if (message.message.toString().contains('point')) {
-                var cor = message.message.split(' ');
-                increment(double.parse(cor[1]), double.parse(cor[2]));
-              } else if (message.message.toString().contains('custommarker')) {
-                var cor = message.message.split(' ');
-                customMarkerTapButton(cor[1].toString());
-              }
+      ..loadFlutterAsset(
+          kIsWeb ?
+          kReleaseMode
+              ? "assets/packages/ntk_map_view/assets/map_mobile.html"
+              : "packages/ntk_map_view/assets/map_mobile.html"
 
-              print("rec mes ${message.message.toString()}");
-            })
-          });
+              : "packages/ntk_map_view/assets/map_mobile.html"
+      )
+          .then((value) => {
+                controller.runJavaScript("console.log('HELLO From Flutter!!')"),
+                widget.onCreateEnd!(widget.controller! as NtkMapController),
+                controller.setOnConsoleMessage((message) {
+                  if (message.message.toString().contains('click')) {
+                    var cor = message.message.split(' ');
+                    onMapClicked(double.parse(cor[1]), double.parse(cor[2]));
+                  } else if (message.message.toString().contains('point')) {
+                    var cor = message.message.split(' ');
+                    increment(double.parse(cor[1]), double.parse(cor[2]));
+                  } else if (message.message
+                      .toString()
+                      .contains('custommarker')) {
+                    var cor = message.message.split(' ');
+                    customMarkerTapButton(cor[1].toString());
+                  }
+
+                  print("rec mes ${message.message.toString()}");
+                })
+              });
 
     super.initState();
   }

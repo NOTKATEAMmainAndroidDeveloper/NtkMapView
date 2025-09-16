@@ -9,6 +9,8 @@ Crossplatform Flutter map widget, powered with Leaflet(that used OSM)
 > 
 >> *Insert the user's personal data at your own risk, as on the WEB version this may lead to data theft. Be cautious when using such data and do so at your own risk. We are not responsible for data loss.*
 
+>Supported **WASM**
+
 ## Usage map
 
 If you need only a blank map create a widget

@@ -1,17 +1,17 @@
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
+
 import '../interfaces/ntk_view_interface.dart';
 import '../web/ntk_map_controller_web.dart';
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:web/web.dart' as html;
 
 import 'dart:ui_web' if (dart.library.io) '' as ui;
 
-import 'package:js/js.dart' if (dart.library.io) '' as js;
-
 import 'package:latlong2/latlong.dart';
-import 'package:universal_html/js_util.dart' as js_util;
 
 ///Web state for widget
-@js.JSExport()
+@JSExport()
 class NtkMapViewState extends State<NtkMapViewInterface> {
   late String viewID;
 
@@ -20,8 +20,8 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
   /// param:
   /// **[lat]** - latitude on point
   /// **[lon]** - longitude of point
-  @js.JSExport()
-  void onMapCl(lat, lon) {
+  @JSExport()
+  void onMapCl(double lat, double lon) {
     if (widget.onMapClick != null) {
       widget.onMapClick!(LatLng(lat, lon));
     }
@@ -31,9 +31,14 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
   ///
   /// param:
   /// **[buttonId]** - id of clicked button
-  @js.JSExport()
-  void customCl(buttonId) {
-    widget.controller!.markersAction[buttonId.id]!();
+  @JSExport()
+  void customCl(String buttonId) {
+    widget.controller!.markersAction[buttonId]!();
+  }
+
+  @JSExport()
+  void onCreatedEnd() {
+    widget.onCreateEnd!(widget.controller! as NtkMapController);
   }
 
   ///This a internal callback when user click on marker
@@ -41,7 +46,7 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
   /// param:
   /// **[lat]** - latitude on point
   /// **[lon]** - longitude of point
-  @js.JSExport()
+  @JSExport()
   void increment(var lat, var lon) {
     try {
       LatLng point = LatLng(lat, lon);
@@ -61,12 +66,13 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
     viewID = widget.controller!.viewId;
 
     if (widget.onCreateStart != null) widget.onCreateStart!();
-    final export = js_util.createDartExport(this);
 
     ui.platformViewRegistry.registerViewFactory(viewID, (int id) {
-      js_util.setProperty(js_util.globalThis, '_appState', export);
+      globalContext.setProperty("onMapCl".toJS, onMapCl.toJS);
+      globalContext.setProperty("customCl".toJS, customCl.toJS);
+      globalContext.setProperty("onCreatedEnd".toJS, onCreatedEnd.toJS);
 
-      return html.IFrameElement()
+      return html.HTMLIFrameElement()
         ..id = viewID
         ..width = MediaQuery.of(context).size.width.toString()
         ..height = MediaQuery.of(context).size.height.toString()
@@ -90,9 +96,6 @@ class NtkMapViewState extends State<NtkMapViewInterface> {
       height: size.height,
       child: HtmlElementView(
         viewType: viewID,
-        onPlatformViewCreated: (e) {
-          widget.onCreateEnd!(widget.controller! as NtkMapController);
-        },
       ),
     );
   }
